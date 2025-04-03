@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "n8n": {
+      "command": "node",
+      "args": ["C:/Users/gloli/AppData/Roaming/Roo-Code/MCP/n8n-server/build/index.js"],
+      "env": {
+        "N8N_API_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJiOWU2YWNlYi00NTE0LTQxMjktOWM0My04ZGY4ZjIzMTkyZTkiLCJpc3MiOiJuOG4iLCJhdWQiOiJwdWJsaWMtYXBpIiwiaWF0IjoxNzQzMjA0MDM5fQ._3oUdJcOh3IVST1XXtu-enlcxiChCTE5hNcGptxEsJE"
+      },
+      "disabled": false,
+      "alwaysAllow": []
+    }
+  }
+}
