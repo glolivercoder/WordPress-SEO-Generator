@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WordPress SEO N8N Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        window.global = window;
+    </script>
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold mb-2">WordPress SEO Content Generator</h1>
+            <p class="text-gray-600">Generate SEO-optimized content using N8N and AI</p>
+        </div>
+
+        <!-- Connection Status and Workflow Controls -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <div class="flex items-center justify-between">
+                <div class="flex gap-4">
+                    <div class="flex items-center">
+                        <div id="n8nStatus" class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                        <span>N8N Connection</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div id="workflowStatus" class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                        <span>Workflow Status</span>
+                    </div>
+                    <div class="flex items-center">
+                        <div id="wordpressStatus" class="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
+                        <span>WordPress Connection</span>
+                    </div>
+                </div>
+                
+                <div>
+                    <button 
+                        id="toggleWorkflowBtn" 
+                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-400"
+                        disabled>
+                        Start Workflow
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Configuration -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">API Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">N8N API Key</label>
+                    <input type="password" id="n8nKey" class="w-full p-2 border rounded" value="{{$N8N_API_KEY}}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">OpenAI API Key</label>
+                    <input type="password" id="openaiKey" class="w-full p-2 border rounded" value="{{$OPENAI_API_KEY}}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Perplexity API Key</label>
+                    <input type="password" id="perplexityKey" class="w-full p-2 border rounded" value="{{$PERPLEXITY_API_KEY}}">
+                </div>
+                <div class="flex items-end">
+                    <button id="saveApiKeys" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Save API Keys
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- WordPress Configuration -->
+        <div class="bg-white rounded-lg shadow p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">WordPress Configuration</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Site URL</label>
+                    <input type="text" id="wpUrl" class="w-full p-2 border rounded" value="{{$WORDPRESS_URL}}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Username</label>
+                    <input type="text" id="wpUsername" class="w-full p-2 border rounded" value="{{$WORDPRESS_USERNAME}}">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Password</label>
+                    <input type="password" id="wpPassword" class="w-full p-2 border rounded" value="{{$WORDPRESS_PASSWORD}}">
+                </div>
+                <div class="flex items-end">
+                    <button id="saveWpConfig" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                        Save WordPress Config
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Research Query Input -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <h2 class="text-xl font-bold mb-4">Research Query</h2>
+            <div class="mb-4">
+                <textarea 
+                    id="prompt" 
+                    rows="4" 
+                    class="w-full p-2 border rounded" 
+                    placeholder="Enter your research query here..."></textarea>
+            </div>
+            <div class="flex items-center gap-4">
+                <button 
+                    id="generateBtn"
+                    class="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:bg-gray-400">
+                    Generate Content
+                </button>
+                <div id="generateStatus" class="text-gray-600 hidden items-center">
+                    <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Generating content...
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Section -->
+        <div class="bg-white rounded-lg shadow-md p-6 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Preview</h2>
+                <div class="flex gap-2">
+                    <button 
+                        id="editBtn" 
+                        class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 disabled:bg-gray-300"
+                        disabled>
+                        Edit
+                    </button>
+                    <button 
+                        id="publishBtn" 
+                        class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 disabled:bg-gray-300"
+                        disabled>
+                        Publish to WordPress
+                    </button>
+                </div>
+            </div>
+            <div id="preview" class="prose max-w-none min-h-[200px] p-4 border rounded">
+                <p class="text-gray-500 italic">Content preview will appear here...</p>
+            </div>
+        </div>
+
+        <!-- Logs Section -->
+        <div class="bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold mb-4">Logs</h2>
+            <div id="logs" class="bg-gray-100 p-4 rounded h-48 overflow-y-auto font-mono text-sm">
+                <div class="text-gray-500">System ready. Waiting for operations...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/app.js"></script>
+</body>
+</html>

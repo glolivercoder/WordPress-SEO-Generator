@@ -1,0 +1,203 @@
+{
+  "name": "🔍🛠️Generate SEO-Optimized WordPress Content with Perplexity Research",
+  "active": true,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "trigger-seo-content",
+        "httpMethod": "POST",
+        "responseMode": "lastNode",
+        "options": {},
+        "authentication": "none"
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "webhookId": "trigger-seo-content",
+      "position": [
+        -800,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.perplexity.ai/chat/completions",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$PERPLEXITY_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "sonar-pro"
+            },
+            {
+              "name": "messages",
+              "value": [
+                {
+                  "role": "system",
+                  "content": "You are a specialized research expert focusing on comprehensive topic analysis. Provide in-depth research with current statistics, expert opinions, and relevant case studies. Structure your response with clear headings and include key takeaways that will be valuable for blog content."
+                },
+                {
+                  "role": "user",
+                  "content": "={{ $json['Research Query'] }}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "name": "Perplexity Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -600,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://api.openai.com/v1/chat/completions",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer {{$OPENAI_API_KEY}}"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4-turbo-preview"
+            },
+            {
+              "name": "messages",
+              "value": [
+                {
+                  "role": "system",
+                  "content": "You are an expert SEO content writer specializing in creating engaging, well-structured blog posts. Follow these guidelines:\n1. Create an attention-grabbing title with target keywords\n2. Write engaging meta descriptions\n3. Use proper heading hierarchy (H1, H2, H3)\n4. Include relevant statistics and expert quotes\n5. Optimize content length (1500-2000 words)\n6. Use transition words for better readability\n7. Include a clear call-to-action\n8. Format content with bullet points and short paragraphs"
+                },
+                {
+                  "role": "user",
+                  "content": "={{ $json.choices[0].message.content }}"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "name": "OpenAI Content Generation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -400,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://atitudesport.com.br/afiliadoamz/wp-json/wp/v2/posts",
+        "authentication": "basicAuth",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.choices[0].message.content.split('\\n')[0] }}"
+            },
+            {
+              "name": "content",
+              "value": "={{ $json.choices[0].message.content }}"
+            },
+            {
+              "name": "status",
+              "value": "draft"
+            }
+          ]
+        }
+      },
+      "name": "WordPress Post Creation",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "credentials": {
+        "basicAuth": {
+          "username": "gloliverx",
+          "password": "LHyY s9Gf a1ty STgf IrS2 ZUKZ"
+        }
+      },
+      "position": [
+        -200,
+        300
+      ]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Perplexity Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity Research": {
+      "main": [
+        [
+          {
+            "node": "OpenAI Content Generation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Content Generation": {
+      "main": [
+        [
+          {
+            "node": "WordPress Post Creation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}
